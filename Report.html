@@ -1,0 +1,294 @@
+<html>
+<head>
+<title> CS440 Homework: HW2 Computer Vision </title>
+<style>
+<!--
+body{
+font-family: 'Trebuchet MS', Verdana;
+}
+p{
+font-family: 'Trebuchet MS', Times;
+margin: 10px 10px 15px 20px;
+}
+h3{
+margin: 5px;
+}
+h2{
+margin: 10px;
+}
+h1{
+margin: 10px 0px 0px 20px;
+}
+div.main-body{
+align:center;
+margin: 30px;
+}
+hr{
+margin:20px 0px 20px 0px;
+}
+-->
+</style>
+</head>
+
+<body>
+<center>
+<a href="http://www.bu.edu"><img border="0" src="http://www.cs.bu.edu/fac/betke/images/bu-logo.gif"
+width="119" height="120"></a>
+</center>
+
+<h1>Assignment Title</h1>
+<p> 
+ CS 440/640 Programming assignment 2 <br>
+ Chanavee Prasopsanti <br>
+ Danial Katz <br>
+ Asif Rahman <br>
+    11/5/2019
+</p>
+
+<div class="main-body">
+<hr>
+<h2> Problem Definition </h2>
+<p>
+    This assignment is processed using opencv in python covered by topic of Computer Vision.
+    We are required to implement 3 different hand gestures:
+    where 2 of 3 is static and the another is dynamic.
+    A goal is to make our programs able to determine the corresponding shape of hand.
+    Background Subtraction, Template Matching, Movement Tracking, RBG calculation is strongly needed for this assignment.
+    The most challenging thins in this assignment is Template Matching.
+    However the most confusing difficulty is Background Subtraction.
+</p>
+
+<hr>
+<h2> Method and Implementation </h2>
+<p>
+    1. We capture the video using opencv and assign it to variable; cap = cv2.VideoCapture(0).<br>
+    2. We read the variable cap from step 1. and get frame from function read(); ret,frame = cap.read()<br>
+    3. Since leaving the frame as it is make the output screen laggy and slow, we resize it using function make_frame_smaller. make_frame_smaller will take 2 parameters frame and ratio, it will get the width and height of the frame and then multiply it with ratio before passing the value into cv2.resize().<br>
+    4. Then, we use bilateral filter to handle the glitch and use flip to make the output easier to understand just like a mirror.<br>
+    5. we are require to take our photo at that exact moment to use as a base background. Once we get the background, we pass the frame into background_removal which is the function that require frame as only parameters, and store to value in variable bgRM.<br>
+    7. In the background_removal, the current moment will be apply to BackgroundSubtractor to compare the different between base background and the current moment and highlight and capture the different which should be our hand.<br>
+
+    8. Next, the bgRm is pass into skin_detection. <br />
+    9. In the process of skin detection, we convert the current frame to gray scale and use a gaussian blur to soften edges. Then we threshold the pixels that are within certain range that we have defined for skin tone. <br />
+
+    10. After that we find the contours of our background removed and skin detected frame. The contours represents the outline of the shape in the foreground and then we use the contours to detect the number of fingers. <br />
+
+    11. For the process of calculaitng the number of fingers, we call the function "calculateFingers." we first compute the convex hull of the contour which is the shape that connects the contours maintainly convex angles. <br />
+
+    12. Then we compute the defects between the convex hull and contours which represents the blue dot in between fingers. For each defect, we calculate the angle of each defect and angle is less than 90 degree we assume it's a gap between two fingers. We add it to our counter and return the counter. <br/>
+
+	13. After we calculate the number of fingers, we use this number to detect which gesture is this. If number of finger = 0, it's fist. If number of finger = 1, it's peace. If number of finger > 4, it's an open hand.  <br />
+
+	14. In the case where we detect an open hand, we check if that is lateral movement using the "detect_waving" function. We keep track of the center of the hand in each frame. Then calculate the direction in which the hand is moving. <br />   
+</p>
+
+
+<hr>
+<h2>Experiments</h2>
+<p>Describe your experiments, including the number of tests that you performed, and the relevant parameter values. <br />
+
+Define your evaluation metrics, e.g., detection rates, accuracy, running time.</p>
+
+<h4>The confusion Matrix</h4> 
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-t4zm{font-size:16px;border-color:inherit;text-align:center;vertical-align:middle}
+.tg .tg-l93j{font-weight:bold;font-size:16px;border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-r2yh{font-size:22px;border-color:inherit;text-align:center;vertical-align:middle}
+.tg .tg-7btt{font-weight:bold;border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-72fj{font-weight:bold;font-size:16px;border-color:inherit;text-align:center;vertical-align:middle}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-r2yh" colspan="2" rowspan="2"><span style="font-weight:bold">Fist</span></th>
+    <th class="tg-l93j" colspan="2">Predicted</th>
+    <th class="tg-t4zm" rowspan="2"><span style="font-weight:bold">Sum</span></th>
+  </tr>
+  <tr>
+    <td class="tg-7btt">1</td>
+    <td class="tg-7btt">0</td>
+  </tr>
+  <tr>
+    <td class="tg-72fj" rowspan="2">Ground Truth</td>
+    <td class="tg-7btt">&nbsp;&nbsp;1&nbsp;&nbsp;</td>
+    <td class="tg-c3ow">&nbsp;&nbsp;6</td>
+    <td class="tg-c3ow">&nbsp;&nbsp;4</td>
+    <td class="tg-c3ow">10</td>
+  </tr>
+  <tr>
+    <td class="tg-7btt">&nbsp;&nbsp;0 </td>
+    <td class="tg-c3ow">1</td>
+    <td class="tg-c3ow">&nbsp;&nbsp;9</td>
+    <td class="tg-c3ow">10</td>
+  </tr>
+</table>
+
+<p><b> Analysis for Fist </b></p>
+<p> Precision: 0.85; Recall: 0.6; F1-score: 0.7; Accuracy: 0.75 </p><br />
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-t4zm{font-size:16px;border-color:inherit;text-align:center;vertical-align:middle}
+.tg .tg-l93j{font-weight:bold;font-size:16px;border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-r2yh{font-size:22px;border-color:inherit;text-align:center;vertical-align:middle}
+.tg .tg-7btt{font-weight:bold;border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-72fj{font-weight:bold;font-size:16px;border-color:inherit;text-align:center;vertical-align:middle}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-r2yh" colspan="2" rowspan="2"><span style="font-weight:bold">Peace</span></th>
+    <th class="tg-l93j" colspan="2">Predicted</th>
+    <th class="tg-t4zm" rowspan="2"><span style="font-weight:bold">Sum</span></th>
+  </tr>
+  <tr>
+    <td class="tg-7btt">1</td>
+    <td class="tg-7btt">0</td>
+  </tr>
+  <tr>
+    <td class="tg-72fj" rowspan="2">Ground Truth</td>
+    <td class="tg-7btt">&nbsp;&nbsp;1&nbsp;&nbsp;</td>
+    <td class="tg-c3ow">&nbsp;&nbsp;7</td>
+    <td class="tg-c3ow">&nbsp;&nbsp;3</td>
+    <td class="tg-c3ow">10</td>
+  </tr>
+  <tr>
+    <td class="tg-7btt">&nbsp;&nbsp;0 </td>
+    <td class="tg-c3ow">0</td>
+    <td class="tg-c3ow">&nbsp;&nbsp;10</td>
+    <td class="tg-c3ow">10</td>
+  </tr>
+</table>
+
+<p><b> Analysis for Peace </b></p>
+<p> Precision: 1; Recall: 0; F1-score: 0.7; Accuracy: 0.85 </p><br />
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-t4zm{font-size:16px;border-color:inherit;text-align:center;vertical-align:middle}
+.tg .tg-l93j{font-weight:bold;font-size:16px;border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-r2yh{font-size:22px;border-color:inherit;text-align:center;vertical-align:middle}
+.tg .tg-7btt{font-weight:bold;border-color:inherit;text-align:center;vertical-align:top}
+.tg .tg-72fj{font-weight:bold;font-size:16px;border-color:inherit;text-align:center;vertical-align:middle}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-r2yh" colspan="2" rowspan="2"><span style="font-weight:bold">Waving Hand</span></th>
+    <th class="tg-l93j" colspan="2">Predicted</th>
+    <th class="tg-t4zm" rowspan="2"><span style="font-weight:bold">Sum</span></th>
+  </tr>
+  <tr>
+    <td class="tg-7btt">1</td>
+    <td class="tg-7btt">0</td>
+  </tr>
+  <tr>
+    <td class="tg-72fj" rowspan="2">Ground Truth</td>
+    <td class="tg-7btt">&nbsp;&nbsp;1&nbsp;&nbsp;</td>
+    <td class="tg-c3ow">&nbsp;&nbsp;6</td>
+    <td class="tg-c3ow">&nbsp;&nbsp;4</td>
+    <td class="tg-c3ow">10</td>
+  </tr>
+  <tr>
+    <td class="tg-7btt">&nbsp;&nbsp;0 </td>
+    <td class="tg-c3ow">1</td>
+    <td class="tg-c3ow">&nbsp;&nbsp;9</td>
+    <td class="tg-c3ow">10</td>
+  </tr>
+</table>
+
+
+<p><b> Analysis for Waving hand </b></p>
+<p> Precision: 0.85; Recall: 0.6; F1-score: 0.7; Accuracy: 0.75 </p><br />
+
+
+<hr>
+<h2> Results</h2>
+<p>
+List your experimental results.  Provide examples of input images and output
+images. If relevant, you may provide images showing any intermediate steps.  If
+your work involves videos, do not submit the videos but only links to them.
+</p>
+
+<p>
+<table>
+<tr><td colspan=3><center><h3>Results</h3></center></td></tr>
+<tr>
+<td> Trial </td> <td> Result Image</td><td> Failed Image</td>
+</tr>
+<tr>
+  <td> trial 1 </td> 
+  <td> <img src="res1.png"> </td>
+  <td> <img src="fail1.png"> </td>
+</tr> 
+<tr>
+  <td> trial 2 </td> 
+  <td> <img src="res2.png"> </td>
+  <td> <img src="fail2.png"> </td>
+</tr> 
+<tr>
+  <td> trial 3 </td> 
+  <td> <img src="res3.png"> </td>
+  <td> <img src="fail3.png"> </td>
+</tr> 
+</table>
+</p>
+
+
+
+<hr>
+<h2> Discussion </h2>
+
+<p> 
+Discuss your method and results:
+<ul>
+<li>Our method's weaknesses is skin detection and the base background, which is you may need to reset if the background gets messy. On the other hand, our strengths is accuracy of subtraction and shape identifying</li>
+<li>
+     We can consider our result is a success as our hand recognition works almost 80% of the time; However, there still are flaws that need to be improve like the if there are colors similar to skin the hand recognition captures that in the background. </li>
+<li>
+We use background differencing to detect gestures. A side of effect of this is any movement is being picked up as a gesture. That's why I need to reset to background once in a while. If you had more time, we would mitigate the issue of background noise by automating the reset process. A way we can do this is by having a threshold of the number of pixels that can be moving in the foreground. If the threshold is reached, then reset the background.
+</li> 
+
+
+</ul>
+</p>
+
+<hr>
+<h2> Conclusions </h2>
+<p>THe main takeaway is building a real world project that uses computer vision technologies. We got to learn OpenCV and implement object recognition. Our hand gesture recognition works majority despite having some limitations.
+</p>
+
+
+<hr>
+<h2> Credits and Bibliography </h2>
+<p>
+
+Cite any papers or other references you consulted while developing
+your solution.  Citations to papers should include the authors, the
+year of publication, the title of the work, and the publication
+information (e.g., book name and publisher; conference proceedings and
+location; journal name, volume and pages; technical report and
+institution).  
+
+<p>
+convexityDefects: https://docs.opencv.org/2.4/modules/imgproc/doc/structural_analysis_and_shape_descriptors.html
+convexityDefects: https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_contours/py_contours_more_functions/py_contours_more_functions.html
+</p>
+
+<p>
+Credit any joint work or discussions with your classmates. 
+</p>
+<hr>
+</div>
+</body>
+
+
+
+</html>
