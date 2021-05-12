@@ -1,2 +1,1 @@
-
 #OpenCV hand gesture recognizer
